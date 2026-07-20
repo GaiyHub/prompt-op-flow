@@ -420,12 +420,18 @@ class Engine:
         if baseline_eval is None:
             raise ValueError("Baseline eval required before optimization.")
         feedback = self.ws.db.all_feedback(change_id)
+        run_meta = self._run_for_change(change_id)
+        background = self.templates.background(
+            run_meta["platform"],
+            run_meta["platformAgentId"],
+        )
         ctx = OptimizerContext(
             change_id=change_id,
             baseline_profile=cdata["baseline"].normalized,
             baseline_eval=baseline_eval,
             feedback=feedback,
             target_section=section,
+            background=background,
         )
         optimizer = self.optimizer_registry.get(implementation)
         opt_input = optimizer.optimize(ctx)

@@ -21,6 +21,15 @@ templates:
     description: 默认人工确认流水线
     steps: []  # 使用内置模板，此处留空
 
-bindings:
-  mock:support-agent: interactive-release
-  mock: ci-regression
+# 智能体 profile：支持 platform:agentId 或 platform 级别默认
+# 每个条目可包含 template（流水线模板）和 background（背景说明，优化时注入提示词）
+profile:
+  mock:support-agent:
+    template: interactive-release
+    background: |
+      你是一个客服智能体，目标是准确处理用户的退款、订单查询和售后问题。
+      回答需要礼貌、简洁，并在必要时询问订单号。
+  mock:
+    template: ci-regression
+    background: |
+      通用 mock 平台智能体，用于演示和回归测试。

@@ -105,7 +105,13 @@ class QoderCliClient:
         section: str,
         failed_samples: List[dict[str, Any]],
         feedback: List[dict[str, Any]],
+        background: str = "",
     ) -> dict[str, Any]:
+        background_section = (
+            f"\nAgent background and goal:\n---\n{background}\n---\n"
+            if background
+            else ""
+        )
         prompt = f"""You are a prompt optimization assistant for an AI agent.
 
 Section to optimize: {section}
@@ -114,12 +120,14 @@ Current prompt:
 ---
 {current_prompt}
 ---
-
+{background_section}
 Failed evaluation samples:
 {json.dumps(failed_samples, ensure_ascii=False, indent=2)}
 
 Human feedback:
 {json.dumps(feedback, ensure_ascii=False, indent=2)}
+
+When optimizing, keep the agent's background and goal in mind.
 
 Please return ONLY a JSON object in the following shape (no markdown, no extra text):
 {{

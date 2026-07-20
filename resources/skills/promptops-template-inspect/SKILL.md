@@ -1,6 +1,6 @@
 ---
 name: promptops-template-inspect
-description: Inspect built-in and custom pipeline templates for PromptOps. Use when the user wants to see available templates, their steps, and bindings.
+description: Inspect built-in and custom pipeline templates for PromptOps. Use when the user wants to see available templates, their steps, and profile bindings.
 ---
 
 # promptops-template-inspect

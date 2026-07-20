@@ -22,12 +22,14 @@ class OptimizerContext:
         baseline_eval: EvalRun,
         feedback: list[HumanFeedback],
         target_section: str = "systemPrompt",
+        background: str = "",
     ) -> None:
         self.change_id = change_id
         self.baseline_profile = baseline_profile
         self.baseline_eval = baseline_eval
         self.feedback = feedback
         self.target_section = target_section
+        self.background = background
 
 
 class PatchProposalInput:
@@ -67,6 +69,10 @@ class RuleBasedOptimizer(Optimizer):
         feedback_texts = [f.expected for f in ctx.feedback]
 
         additions: list[str] = []
+        if ctx.background:
+            additions.append(
+                "AGENT BACKGROUND AND GOAL: " + ctx.background.strip()
+            )
         if all_missing:
             unique = list(dict.fromkeys(all_missing))
             additions.append(
@@ -126,6 +132,7 @@ class QoderCliOptimizer(Optimizer):
             section=ctx.target_section,
             failed_samples=failed_samples,
             feedback=feedback,
+            background=ctx.background,
         )
         return PatchProposalInput(
             after_value=result["after_value"],

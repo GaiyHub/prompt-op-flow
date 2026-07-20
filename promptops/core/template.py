@@ -116,6 +116,34 @@ def load_template(template_id: str, config: dict[str, Any] | None = None) -> Opt
 
 
 # ---------------------------------------------------------------------------
+# Profile Resolver
+# ---------------------------------------------------------------------------
+
+def _get_profile_entry(
+    config: dict[str, Any],
+    platform: str,
+    agent_id: str,
+) -> dict[str, Any]:
+    """从 profile（或旧版 bindings）读取指定 agent 的配置项。
+
+    支持格式：
+      profile:
+        mock:support-agent:
+          template: interactive-release
+          background: "..."
+        mock: ci-regression          # 向后兼容：字符串视为 template
+    """
+    profile = config.get("profile") or config.get("bindings") or {}
+    key = f"{platform}:{agent_id}"
+    entry = profile.get(key, profile.get(platform, {}))
+    if isinstance(entry, str):
+        return {"template": entry, "background": ""}
+    if isinstance(entry, dict):
+        return entry
+    return {}
+
+
+# ---------------------------------------------------------------------------
 # Template Resolver
 # ---------------------------------------------------------------------------
 
@@ -131,15 +159,18 @@ class TemplateResolver:
     ) -> PipelineTemplate:
         tid = template_id
         if tid is None:
-            # 从 bindings 查找
-            bindings = self._config.get("bindings", {})
-            key = f"{platform}:{agent_id}"
-            tid = bindings.get(key, bindings.get(platform, "interactive-release"))
+            entry = _get_profile_entry(self._config, platform, agent_id)
+            tid = entry.get("template", "interactive-release")
         tpl = load_template(tid, self._config)
         if tpl is None:
             raise ValueError(f"Template '{tid}' not found.")
         validate_dag(tpl)
         return tpl
+
+    def background(self, platform: str, agent_id: str) -> str:
+        """返回 agent 的背景说明，用于优化时注入提示词。"""
+        entry = _get_profile_entry(self._config, platform, agent_id)
+        return entry.get("background", "") or ""
 
 
 def required_evidence(template: PipelineTemplate) -> list[str]:
