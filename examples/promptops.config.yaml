@@ -1,0 +1,26 @@
+# PromptOps 配置示例
+
+# qodercli 本地 LLM 二进制配置
+qodercli:
+  binary: ${QODERCLI_BINARY:-qodercli}
+
+# 平台认证与适配器配置
+platforms:
+  shenji:
+    cookie: ${SHENJI_COOKIE:-}
+    base_url: https://shenji.example.com
+  http:
+    base_url: ${HTTP_PLATFORM_URL:-http://localhost:8000}
+    headers:
+      Authorization: Bearer ${HTTP_PLATFORM_TOKEN:-}
+
+# 模板绑定：支持 platform:agentId 或 platform 级别默认
+templates:
+  - id: interactive-release
+    version: 1
+    description: 默认人工确认流水线
+    steps: []  # 使用内置模板，此处留空
+
+bindings:
+  mock:support-agent: interactive-release
+  mock: ci-regression
